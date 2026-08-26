@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Araf's Assistant — Multilingual AI Chatbot</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">🤖</div>
+          <span>Araf's Assistant</span>
+        </div>
+        <button class="icon-btn" id="close-sidebar-btn" title="Close Sidebar">✕</button>
+      </div>
+
+      <button class="new-chat-btn" id="new-chat-btn">
+        <span>+</span> New Chat
+      </button>
+
+      <!-- History List -->
+      <div class="chat-history" id="chat-history-list">
+        <div class="history-group-title">Recent Chats</div>
+        <div id="conversations-container">
+          <!-- Dynamic conversation items inserted here -->
+        </div>
+      </div>
+
+      <!-- User Profile & Settings Footer -->
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar-initial">U</div>
+          <div class="user-name" id="user-display-name">Loading...</div>
+        </div>
+        <div style="display: flex; gap: 4px;">
+          <button class="icon-btn" id="theme-toggle-btn" title="Toggle Theme">🌓</button>
+          <button class="icon-btn" id="logout-btn" title="Logout" style="color: var(--danger-color);">🚪</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <main class="main-chat">
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn icon-btn" id="mobile-menu-btn">☰</button>
+          <div class="model-badge">
+            <span style="color: #10b981;">●</span>
+            <select id="model-select" style="background: transparent; border: none; color: inherit; font-weight: inherit; outline: none; cursor: pointer;">
+              <option value="gemini-3.6-flash" selected>Gemini 3.6 Flash</option>
+              <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+              <option value="gpt-4o-mini">GPT-4o Mini</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="icon-btn" id="clear-chat-btn" title="Clear View">🗑️</button>
+        </div>
+      </header>
+
+      <!-- Messages Stream Area -->
+      <div class="messages-container" id="messages-container">
+        <!-- Welcome Hero Screen (shown when conversation is empty) -->
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-logo">🤖</div>
+          <h1 class="welcome-title">Araf's Assistant</h1>
+          <p class="welcome-subtitle">Your intelligent multilingual coding & search companion. Supports বাংলা, English, and Banglish.</p>
+
+          <div class="suggestions-grid">
+            <div class="suggestion-card" onclick="useSuggestion('Django তে Authentication ও JWT কীভাবে সেটআপ করবো?')">
+              <strong>🔐 Django Auth</strong>
+              <div>Django তে Authentication ও JWT কীভাবে সেটআপ করবো?</div>
+            </div>
+            <div class="suggestion-card" onclick="useSuggestion('Python এ Decorator কীভাবে কাজ করে? একটা সহজ উদাহরণ দাও')">
+              <strong>🐍 Python Decorators</strong>
+              <div>Python এ Decorator কীভাবে কাজ করে? উদাহরণ দাও</div>
+            </div>
+            <div class="suggestion-card" onclick="useSuggestion('What is the difference between PostgreSQL and SQLite?')">
+              <strong>🗄️ Database Comparison</strong>
+              <div>PostgreSQL vs SQLite difference & best practices</div>
+            </div>
+            <div class="suggestion-card" onclick="useSuggestion('FastAPI vs Django - কখন কোনটা ব্যবহার করা উচিত?')">
+              <strong>⚡ Web Frameworks</strong>
+              <div>FastAPI vs Django - কখন কোনটা বেছে নেব?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Chat Input Bar -->
+      <div class="input-container">
+        <div class="input-box-wrapper">
+          <textarea
+            class="chat-input"
+            id="chat-input"
+            placeholder="Araf's Assistant-কে যেকোনো প্রশ্ন করুন... (Shift+Enter for new line)"
+            rows="1"
+          ></textarea>
+          
+          <div class="input-actions-bar">
+            <div class="input-tools">
+              <button class="tool-toggle-btn active" id="web-search-toggle" title="Toggle Live Web Search">
+                🌐 Web Search <span id="search-status-dot" style="color: #10b981;">ON</span>
+              </button>
+            </div>
+            
+            <button class="send-btn" id="send-btn" title="Send Message" disabled>
+              ➤
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/chat.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

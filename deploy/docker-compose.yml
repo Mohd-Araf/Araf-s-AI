@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: arafs_assistant_db
+    restart: always
+    environment:
+      POSTGRES_DB: arafs_assistant_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_secure_password_2026
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: arafs_assistant_web
+    restart: always
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"
+    volumes:
+      - ..:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=django-insecure-arafs-assistant-production-key-change-this
+      - DATABASE_URL=postgresql://postgres:postgres_secure_password_2026@db:5432/arafs_assistant_db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

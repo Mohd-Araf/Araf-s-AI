@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Araf's Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="auth-page-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="brand-icon">🤖</div>
+      <h2 class="auth-title">Welcome Back</h2>
+      <p class="auth-subtitle">Login to access Araf's Assistant</p>
+    </div>
+
+    <div class="alert-box alert-error" id="error-alert"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label" for="username">Username or Email</label>
+        <input type="text" id="username" class="form-control" placeholder="araf or araf@example.com" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="auth-submit-btn" id="submit-btn">Login</button>
+    </form>
+
+    <div class="auth-footer-text">
+      Don't have an account? <a href="/register/">Create Account</a>
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (localStorage.getItem('authToken')) {
+      window.location.href = '/';
+    }
+
+    const form = document.getElementById('login-form');
+    const alertBox = document.getElementById('error-alert');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Logging in...';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/v1/auth/login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = '/';
+        } else {
+          const errMsg = data.non_field_errors?.[0] || data.detail || 'Login failed. Check your credentials.';
+          alertBox.innerText = errMsg;
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.innerText = 'Network error. Please try again.';
+        alertBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Login';
+      }
+    });
+  </script>
+</body>
+</html>
